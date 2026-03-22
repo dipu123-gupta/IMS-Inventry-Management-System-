@@ -1,3 +1,4 @@
+const { eventBus, EVENTS } = require('../../utils/eventBus');
 const BillRepository = require('../repositories/BillRepository');
 const OrderRepository = require('../repositories/OrderRepository');
 const Counter = require('../../models/Counter');

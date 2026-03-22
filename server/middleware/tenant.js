@@ -10,7 +10,14 @@ const tenantMiddleware = (req, res, next) => {
   }
 
   // Attach organization context to request (as string ID)
-  req.organization = req.user.organization._id.toString();
+  const orgId = req.user.organization._id || req.user.organization;
+  req.organization = orgId ? orgId.toString() : null;
+  
+  if (!req.organization) {
+    return res.status(403).json({ 
+      message: 'Access denied. Organization context missing.' 
+    });
+  }
   next();
 };
 

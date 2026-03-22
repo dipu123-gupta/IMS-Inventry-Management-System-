@@ -6,10 +6,10 @@ exports.paymentSchema = z.object({
     type: z.enum(['payable', 'receivable']),
     paymentMode: z.enum(['cash', 'bank_transfer', 'cheque', 'card', 'upi']),
     bill: z.string().optional(),
-    supplier: z.string().optional(),
+    vendor: z.string().optional(),
     customer: z.string().optional(),
     reference: z.string().optional(),
-    date: z.string().datetime().optional(),
+    date: z.string().optional(),
     notes: z.string().optional()
   })
 });

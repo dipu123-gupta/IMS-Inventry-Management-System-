@@ -10,14 +10,18 @@ const initInventoryListeners = () => {
   // 1. Auto-initialize stock when a product is created
   eventBus.on(EVENTS.PRODUCT_CREATED, async ({ orgId, product }) => {
     try {
+      if (!product?._id || !orgId) return;
+
       // Find all warehouses for this org
       const warehouses = await Warehouse.find({ organization: orgId });
       
       for (const warehouse of warehouses) {
-        await InventoryService.initializeStock(product._id, warehouse._id, orgId);
+        if (warehouse?._id) {
+          await InventoryService.initializeStock(product._id, warehouse._id, orgId);
+        }
       }
       
-      logger.info(`Auto-stock initialization completed for product ${product.sku}`);
+      logger.info(`Auto-stock initialization completed for product ${product?.sku || product?._id}`);
     } catch (err) {
       logger.error(`Error in PRODUCT_CREATED listener for ${product?._id}:`, err);
     }

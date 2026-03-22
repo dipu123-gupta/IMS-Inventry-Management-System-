@@ -180,10 +180,14 @@ const serverNode = server.listen(PORT, () => {
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err) => {
   console.error('UNHANDLED REJECTION! 💥 Shutting down...');
-  console.error(err.name, err.message);
-  serverNode.close(() => {
+  console.error(err.name, err.message, err.stack);
+  if (serverNode) {
+    serverNode.close(() => {
+      process.exit(1);
+    });
+  } else {
     process.exit(1);
-  });
+  }
 });
 
 module.exports = { app, server };

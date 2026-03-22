@@ -38,9 +38,11 @@ const EVENTS = {
   QUOTE_ACCEPTED: 'quote:accepted',
   QUOTE_CONVERTED: 'quote:converted',
 
-  // Bills
+  // Bills & Invoices
   BILL_CREATED: 'bill:created',
   BILL_PAID: 'bill:paid',
+  INVOICE_CREATED: 'invoice:created',
+  INVOICE_PAID: 'invoice:paid',
 
   // Payments
   PAYMENT_RECORDED: 'payment:recorded',

@@ -34,7 +34,7 @@ const invoiceSchema = new mongoose.Schema({
   salesOrder: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Order',
-    required: true,
+    required: false,
   },
   customer: {
     type: mongoose.Schema.Types.ObjectId,
@@ -94,9 +94,14 @@ const invoiceSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-// Auto-generate invoice number and calculate totals
-invoiceSchema.pre('save', async function (next) {
-  if (!this.invoiceNumber) {
+// Auto-generate invoice number and calculate totals before validation
+invoiceSchema.pre('validate', async function (next) {
+  // Handle empty string from frontend for optional Sales Order
+  if (this.salesOrder === '') {
+    this.salesOrder = null;
+  }
+
+  if (!this.invoiceNumber && this.organization) {
     const Counter = require('./Counter');
     const seq = await Counter.getNextSequence(this.organization, 'invoice');
     this.invoiceNumber = `INV-${String(seq).padStart(6, '0')}`;
@@ -113,7 +118,7 @@ invoiceSchema.pre('save', async function (next) {
     this.totalAmount = this.subtotal - this.discountAmount + this.taxAmount;
   }
   
-  this.balance = this.totalAmount - this.amountPaid;
+  this.balance = (this.totalAmount || 0) - (this.amountPaid || 0);
   next();
 });
 

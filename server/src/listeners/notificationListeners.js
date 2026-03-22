@@ -14,11 +14,11 @@ const initNotificationListeners = () => {
       const notification = await Notification.create({
         type: NOTIFICATION_TYPE.ORDER_UPDATE,
         title: `New ${type === 'purchase' ? 'Purchase' : 'Sales'} Order`,
-        message: `Order ${order.orderNumber} created - Total: $${order.totalAmount.toFixed(2)}`,
-        link: `/orders/${order._id}`,
+        message: `Order ${order?.orderNumber || 'N/A'} created - Total: $${Number(order?.totalAmount || 0).toFixed(2)}`,
+        link: `/orders/${order?._id || ''}`,
         organization: orgId,
       });
-      emitNotification(orgId.toString(), notification);
+      if (orgId) emitNotification(orgId.toString(), notification);
     } catch (err) {
       logger.error('Error in ORDER_CREATED notification listener:', err);
     }
@@ -31,12 +31,12 @@ const initNotificationListeners = () => {
     try {
       const notification = await Notification.create({
         type: NOTIFICATION_TYPE.SYSTEM,
-        title: `Payment ${payment.type === 'receivable' ? 'Received' : 'Made'}`,
-        message: `${payment.paymentNumber} — Amount: $${payment.amount.toFixed(2)}`,
+        title: `Payment ${payment?.type === 'receivable' ? 'Received' : 'Made'}`,
+        message: `${payment?.paymentNumber || 'N/A'} — Amount: $${Number(payment?.amount || 0).toFixed(2)}`,
         link: '/billing',
         organization: orgId
       });
-      emitNotification(orgId.toString(), notification);
+      if (orgId) emitNotification(orgId.toString(), notification);
     } catch (err) {
       logger.error('Error in PAYMENT_RECORDED notification listener:', err);
     }
@@ -48,11 +48,11 @@ const initNotificationListeners = () => {
       const notification = await Notification.create({
         type: NOTIFICATION_TYPE.TRANSFER_ALERT,
         title: 'Inventory Transfer Approved',
-        message: `Transfer from warehouse ${transfer.fromWarehouse} is now approved.`,
+        message: `Transfer from warehouse ${transfer?.fromWarehouse || 'N/A'} is now approved.`,
         link: '/inventory/transfers',
         organization: orgId
       });
-      emitNotification(orgId.toString(), notification);
+      if (orgId) emitNotification(orgId.toString(), notification);
     } catch (err) {
       logger.error('Error in TRANSFER_APPROVED notification listener:', err);
     }

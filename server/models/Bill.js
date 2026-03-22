@@ -82,8 +82,8 @@ const billSchema = new mongoose.Schema({
   },
 }, { timestamps: true });
 
-// Auto-generate bill number and calculate totals
-billSchema.pre('save', async function (next) {
+// Auto-generate bill number and calculate totals before validation
+billSchema.pre('validate', async function (next) {
   if (!this.billNumber) {
     const Counter = require('./Counter');
     const seq = await Counter.getNextSequence(this.organization, 'bill');
@@ -93,10 +93,10 @@ billSchema.pre('save', async function (next) {
   // Calculate totals
   if (this.items && this.items.length > 0) {
     this.subtotal = this.items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
-    this.totalAmount = this.subtotal - this.discountAmount + this.taxAmount;
+    this.totalAmount = this.subtotal - (this.discountAmount || 0) + (this.taxAmount || 0);
   }
   
-  this.balance = this.totalAmount - this.amountPaid;
+  this.balance = (this.totalAmount || 0) - (this.amountPaid || 0);
   next();
 });
 

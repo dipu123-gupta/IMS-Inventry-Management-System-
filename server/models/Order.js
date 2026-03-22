@@ -127,8 +127,8 @@ const orderSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Auto-generate order number
-orderSchema.pre('save', async function (next) {
+// Auto-generate order number and calculate totals before validation
+orderSchema.pre('validate', async function (next) {
   if (!this.orderNumber) {
     const Counter = require('./Counter');
     const { ORDER_TYPE: types, ORDER_PREFIX: prefixes } = require('../utils/constants');
@@ -137,14 +137,16 @@ orderSchema.pre('save', async function (next) {
     this.orderNumber = `${prefix}-${String(seq).padStart(6, '0')}`;
   }
   // Calculate totals
-  this.subtotal = this.items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
-  
-  // Calculate aggregate tax and discounts from line items
-  const lineItemDiscounts = this.items.reduce((sum, item) => sum + (item.discount || 0), 0);
-  const lineItemTaxes = this.items.reduce((sum, item) => sum + (item.tax || 0), 0);
-  
-  this.taxAmount = lineItemTaxes + ((this.subtotal - this.discount - lineItemDiscounts) * (this.taxRate / 100));
-  this.totalAmount = this.subtotal - this.discount - lineItemDiscounts + this.taxAmount;
+  if (this.items) {
+    this.subtotal = this.items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
+    
+    // Calculate aggregate tax and discounts from line items
+    const lineItemDiscounts = this.items.reduce((sum, item) => sum + (item.discount || 0), 0);
+    const lineItemTaxes = this.items.reduce((sum, item) => sum + (item.tax || 0), 0);
+    
+    this.taxAmount = lineItemTaxes + ((this.subtotal - (this.discount || 0) - lineItemDiscounts) * ((this.taxRate || 0) / 100));
+    this.totalAmount = this.subtotal - (this.discount || 0) - lineItemDiscounts + this.taxAmount;
+  }
   next();
 });
 

@@ -43,6 +43,11 @@ class InvoiceService {
     const session = await mongoose.startSession();
     session.startTransaction();
     try {
+      // Handle empty string for optional salesOrder from frontend
+      if (data.salesOrder === '') {
+        data.salesOrder = null;
+      }
+
       const invoiceData = {
         ...data,
         organization,
@@ -74,6 +79,11 @@ class InvoiceService {
         const error = new Error('Invoice not found');
         error.statusCode = 404;
         throw error;
+      }
+
+      // Handle empty string for optional salesOrder from frontend
+      if (data.salesOrder === '') {
+        data.salesOrder = null;
       }
 
       Object.assign(invoice, data);

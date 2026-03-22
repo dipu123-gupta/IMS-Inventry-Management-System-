@@ -2,10 +2,12 @@ const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
 const role = require('../middleware/role');
+const tenant = require('../middleware/tenant');
 const { getInvoices, getInvoice, createInvoice, updateInvoice, deleteInvoice } = require('../controllers/invoiceController');
 
 // All routes are protected
 router.use(auth);
+router.use(tenant);
 
 router.route('/')
   .get(getInvoices)

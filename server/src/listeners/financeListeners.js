@@ -7,8 +7,9 @@ const logger = require('../../utils/logger');
  */
 const initFinanceListeners = () => {
   // 1. Record Revenue on Invoice Created (Accrual basis)
-  eventBus.on('INVOICE_CREATED', async ({ orgId, invoice }) => {
+  eventBus.on(EVENTS.INVOICE_CREATED, async ({ orgId, invoice }) => {
     try {
+      if (!invoice || !orgId) return;
       await Finance.create({
         type: 'revenue',
         amount: invoice.totalAmount,
@@ -16,7 +17,7 @@ const initFinanceListeners = () => {
         description: `Revenue from Invoice ${invoice.invoiceNumber}`,
         date: new Date(),
         reference: invoice._id,
-        referenceModel: 'Payment', // We use Payment as a proxy or link it to Payment later
+        referenceModel: 'Invoice',
         organization: orgId
       });
       logger.info(`Auto-recorded revenue ledger for Invoice ${invoice.invoiceNumber}`);
@@ -26,8 +27,9 @@ const initFinanceListeners = () => {
   });
 
   // 2. Record Expense on Bill Created (Accrual basis)
-  eventBus.on('BILL_CREATED', async ({ orgId, bill }) => {
+  eventBus.on(EVENTS.BILL_CREATED, async ({ orgId, bill }) => {
     try {
+      if (!bill || !orgId) return;
       await Finance.create({
         type: 'expense',
         amount: bill.totalAmount,
@@ -35,6 +37,7 @@ const initFinanceListeners = () => {
         description: `Cost from Bill ${bill.billNumber}`,
         date: new Date(),
         reference: bill._id,
+        referenceModel: 'Bill',
         organization: orgId
       });
       logger.info(`Auto-recorded COGS ledger for Bill ${bill.billNumber}`);

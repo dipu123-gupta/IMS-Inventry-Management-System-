@@ -12,7 +12,7 @@ exports.orderSchema = z.object({
       })
     ).min(1, 'At least one item is required'),
     customer: z.string().optional(),
-    supplier: z.string().optional(),
+    vendor: z.string().optional(),
     quoteReference: z.string().optional(),
     paymentMethod: z.enum(['cash', 'card', 'upi', 'bank_transfer', 'credit']).optional()
   })
