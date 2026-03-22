@@ -159,7 +159,7 @@ productSchema.pre('save', function (next) {
 });
 
 productSchema.index({ sku: 1, organization: 1 }, { unique: true });
-productSchema.index({ 'variants.sku': 1, organization: 1 }, { unique: true, sparse: true });
+productSchema.index({ 'variants.sku': 1, organization: 1 }, { unique: true, partialFilterExpression: { 'variants.sku': { $type: 'string' } } });
 productSchema.index({ category: 1, organization: 1 });
 productSchema.index({ barcode: 1, organization: 1 });
 productSchema.index({ isActive: 1, organization: 1 });

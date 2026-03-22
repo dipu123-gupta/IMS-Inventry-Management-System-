@@ -73,4 +73,8 @@ module.exports = {
   // Razorpay
   RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID,
   RAZORPAY_KEY_SECRET: process.env.RAZORPAY_KEY_SECRET,
+
+  // Rate Limiting
+  RATE_LIMIT_WINDOW: parseInt(process.env.RATE_LIMIT_WINDOW, 10) || 15 * 60 * 1000, // Default 15 mins
+  RATE_LIMIT_MAX: parseInt(process.env.RATE_LIMIT_MAX, 10) || 100, // Default 100
 };

@@ -47,7 +47,7 @@ const initFinanceListeners = () => {
   });
 
   // 3. Record Direct Expense
-  eventBus.on('EXPENSE_CREATED', async ({ orgId, expense }) => {
+  eventBus.on(EVENTS.EXPENSE_CREATED, async ({ orgId, expense }) => {
     try {
       await Finance.create({
         type: 'expense',
@@ -62,6 +62,16 @@ const initFinanceListeners = () => {
       logger.info(`Auto-recorded ledger for Expense ${expense.title}`);
     } catch (err) {
       logger.error('Error in EXPENSE_CREATED finance listener:', err);
+    }
+  });
+
+  // 4. Handle Expense Deletion
+  eventBus.on(EVENTS.EXPENSE_DELETED, async ({ orgId, expenseId }) => {
+    try {
+      await Finance.deleteOne({ reference: expenseId, organization: orgId });
+      logger.info(`Removed ledger entry for deleted expense ${expenseId}`);
+    } catch (err) {
+      logger.error('Error in EXPENSE_DELETED finance listener:', err);
     }
   });
 

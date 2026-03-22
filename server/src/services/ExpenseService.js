@@ -20,7 +20,7 @@ class ExpenseService {
     logger.info(`Expense created: ${expense.title} - ${expense.amount}`);
     
     // Emit event for finance listeners
-    eventBus.emit('EXPENSE_CREATED', {
+    eventBus.emit(EVENTS.EXPENSE_CREATED, {
       orgId: organization,
       expense
     });
@@ -34,7 +34,7 @@ class ExpenseService {
     
     await expense.deleteOne();
     
-    eventBus.emit('EXPENSE_DELETED', {
+    eventBus.emit(EVENTS.EXPENSE_DELETED, {
       orgId: organization,
       expenseId: id,
       amount: expense.amount

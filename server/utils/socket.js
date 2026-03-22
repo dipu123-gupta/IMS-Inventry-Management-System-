@@ -121,8 +121,28 @@ const wireEventBusToSocket = () => {
   eventBus.on(EVENTS.BILL_CREATED, ({ orgId, bill }) => {
     emitDataChange(orgId, 'bills', 'created', bill);
   });
+  eventBus.on(EVENTS.BILL_UPDATED, ({ orgId, bill }) => {
+    emitDataChange(orgId, 'bills', 'updated', bill);
+  });
   eventBus.on(EVENTS.BILL_PAID, ({ orgId, bill }) => {
     emitDataChange(orgId, 'bills', 'paid', bill);
+  });
+  eventBus.on(EVENTS.BILL_DELETED, ({ orgId, billId }) => {
+    emitDataChange(orgId, 'bills', 'deleted', { _id: billId });
+  });
+
+  // Invoices
+  eventBus.on(EVENTS.INVOICE_CREATED, ({ orgId, invoice }) => {
+    emitDataChange(orgId, 'invoices', 'created', invoice);
+  });
+  eventBus.on(EVENTS.INVOICE_UPDATED, ({ orgId, invoice }) => {
+    emitDataChange(orgId, 'invoices', 'updated', invoice);
+  });
+  eventBus.on(EVENTS.INVOICE_PAID, ({ orgId, invoice }) => {
+    emitDataChange(orgId, 'invoices', 'paid', invoice);
+  });
+  eventBus.on(EVENTS.INVOICE_DELETED, ({ orgId, invoiceId }) => {
+    emitDataChange(orgId, 'invoices', 'deleted', { _id: invoiceId });
   });
 
   // Payments

@@ -92,11 +92,11 @@ app.use(hpp());
 
 // Rate limiting
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 200,
+  windowMs: config.RATE_LIMIT_WINDOW,
+  max: config.RATE_LIMIT_MAX,
   message: { message: 'Too many requests, please try again later.' },
 });
-app.use('/api', limiter); // Keep general rate limiter on base path
+app.use('/api', limiter);
 
 // API routes - V1
 const apiV1Router = express.Router();

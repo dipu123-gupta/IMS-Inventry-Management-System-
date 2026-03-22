@@ -23,7 +23,17 @@ const initDashboardListeners = () => {
   eventBus.on(EVENTS.PRODUCT_CREATED, refreshDashboard);
   eventBus.on(EVENTS.RETURN_COMPLETED, refreshDashboard);
   eventBus.on(EVENTS.INVOICE_CREATED, refreshDashboard);
+  eventBus.on(EVENTS.INVOICE_PAID, refreshDashboard);
+  eventBus.on(EVENTS.INVOICE_UPDATED, refreshDashboard);
+  eventBus.on(EVENTS.INVOICE_DELETED, refreshDashboard);
+  
   eventBus.on(EVENTS.BILL_CREATED, refreshDashboard);
+  eventBus.on(EVENTS.BILL_PAID, refreshDashboard);
+  eventBus.on(EVENTS.BILL_UPDATED, refreshDashboard);
+  eventBus.on(EVENTS.BILL_DELETED, refreshDashboard);
+  
+  eventBus.on(EVENTS.EXPENSE_CREATED, refreshDashboard);
+  eventBus.on(EVENTS.EXPENSE_DELETED, refreshDashboard);
 
   logger.info('Dashboard Listeners initialized');
 };

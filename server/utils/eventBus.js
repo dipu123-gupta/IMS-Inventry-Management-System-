@@ -41,8 +41,13 @@ const EVENTS = {
   // Bills & Invoices
   BILL_CREATED: 'bill:created',
   BILL_PAID: 'bill:paid',
+  BILL_UPDATED: 'bill:updated',
+  BILL_DELETED: 'bill:deleted',
+  BILL_STATUS_CHANGED: 'bill:statusChanged',
   INVOICE_CREATED: 'invoice:created',
   INVOICE_PAID: 'invoice:paid',
+  INVOICE_UPDATED: 'invoice:updated',
+  INVOICE_DELETED: 'invoice:deleted',
 
   // Payments
   PAYMENT_RECORDED: 'payment:recorded',
@@ -57,9 +62,11 @@ const EVENTS = {
 
   // Returns
   RETURN_COMPLETED: 'return:completed',
+  RETURN_DELETED: 'return:deleted',
 
   // Expenses
   EXPENSE_CREATED: 'expense:created',
+  EXPENSE_DELETED: 'expense:deleted',
 
   // Dashboard (aggregated refresh signal)
   DASHBOARD_UPDATE: 'dashboard:update',

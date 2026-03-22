@@ -222,7 +222,7 @@ class OrderService {
         const existingInvoice = await InvoiceRepository.findOne({ salesOrder: order._id, organization }).session(session);
         if (!existingInvoice) {
           const inv = await this._processConvertToInvoice(order, organization, user, session);
-          eventBus.emit('INVOICE_CREATED', { orgId: organization, invoice: inv });
+          eventBus.emit(EVENTS.INVOICE_CREATED, { orgId: organization, invoice: inv });
         }
       }
 
@@ -231,7 +231,7 @@ class OrderService {
         const existingBill = await BillRepository.findOne({ purchaseOrder: order._id, organization }).session(session);
         if (!existingBill) {
           const bl = await this._processConvertToBill(order, organization, user, session);
-          eventBus.emit('BILL_CREATED', { orgId: organization, bill: bl });
+          eventBus.emit(EVENTS.BILL_CREATED, { orgId: organization, bill: bl });
         }
       }
 
@@ -399,7 +399,7 @@ class OrderService {
         .populate('customer', 'name email')
         .populate('items.product', 'name sku');
 
-      eventBus.emit('INVOICE_CREATED', { orgId: organization, invoice: populated });
+      eventBus.emit(EVENTS.INVOICE_CREATED, { orgId: organization, invoice: populated });
       return populated;
     } catch (error) {
       await session.abortTransaction();
@@ -426,7 +426,7 @@ class OrderService {
       const BillService = require('./BillService');
       const populated = await BillService.getBillById(billDoc._id, organization);
 
-      eventBus.emit('BILL_CREATED', { orgId: organization, bill: populated });
+      eventBus.emit(EVENTS.BILL_CREATED, { orgId: organization, bill: populated });
       return populated;
     } catch (error) {
       await session.abortTransaction();

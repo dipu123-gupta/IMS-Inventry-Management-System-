@@ -7,7 +7,7 @@ const PLANS = {
     limits: {
       maxProducts: 20,
       maxWarehouses: 5,
-      maxUsers: 2,
+      maxUsers: 20,
     },
   },
   PRO: {

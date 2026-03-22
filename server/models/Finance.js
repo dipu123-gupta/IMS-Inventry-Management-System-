@@ -30,7 +30,7 @@ const financeSchema = new mongoose.Schema({
   },
   referenceModel: {
     type: String,
-    enum: ['Order', 'Payment', 'Return', 'Expense']
+    enum: ['Order', 'Payment', 'Return', 'Expense', 'Invoice', 'Bill']
   },
   organization: {
     type: mongoose.Schema.Types.ObjectId,
