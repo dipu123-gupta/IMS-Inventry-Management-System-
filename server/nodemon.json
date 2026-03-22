@@ -1,0 +1,15 @@
+{
+  "ignore": [
+    "logs/*",
+    "uploads/*",
+    "node_modules/*",
+    "*.test.js",
+    "scripts/*",
+    "public/*"
+  ],
+  "watch": [
+    "."
+  ],
+  "ext": "js,json",
+  "delay": 3500
+}
