@@ -81,11 +81,16 @@ const Invoices = () => {
   const handleSubmitForm = async (e) => {
     e.preventDefault();
     try {
+      const payload = { 
+        ...form, 
+        salesOrder: form.salesOrder === '' ? null : form.salesOrder 
+      };
+
       if (isEditing) {
-        await dispatch(updateInvoice({ id: selectedInvoice._id, data: form })).unwrap();
+        await dispatch(updateInvoice({ id: selectedInvoice._id, data: payload })).unwrap();
         toast.success('Invoice updated');
       } else {
-        await dispatch(createInvoice(form)).unwrap();
+        await dispatch(createInvoice(payload)).unwrap();
         toast.success('Invoice created');
       }
       setShowFormModal(false);

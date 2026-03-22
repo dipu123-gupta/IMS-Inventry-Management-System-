@@ -94,7 +94,7 @@ const PurchaseOrders = () => {
       await dispatch(createOrder({ ...form, items: payloadItems, type: ORDER_TYPE.PURCHASE })).unwrap();
       toast.success('Purchase order created');
       setShowModal(false);
-      setForm({ supplier: '', notes: '', items: [{ product: '', warehouse: '', quantity: 1, cost: 0 }] });
+      setForm({ vendor: '', notes: '', items: [{ product: '', warehouse: '', quantity: 1, cost: 0 }] });
       dispatch(fetchOrders({ type: ORDER_TYPE.PURCHASE, page: 1, limit: 10 }));
     } catch (err) {
       toast.error(err || 'Failed to create order');
@@ -332,7 +332,7 @@ const PurchaseOrders = () => {
 
             <div className="modal-action pt-4 border-t border-base-200/60 mt-6">
               <button type="button" className="btn btn-ghost rounded-xl font-bold" onClick={() => setShowModal(false)}>Cancel</button>
-              <button type="submit" className="btn btn-primary rounded-xl font-bold shadow-lg shadow-primary/20 bg-primary/90 hover:bg-primary px-8" disabled={!form.supplier || products.length === 0}>Create Purchase Order</button>
+              <button type="submit" className="btn btn-primary rounded-xl font-bold shadow-lg shadow-primary/20 bg-primary/90 hover:bg-primary px-8" disabled={!form.vendor || products.length === 0}>Create Purchase Order</button>
             </div>
           </form>
         </div>
