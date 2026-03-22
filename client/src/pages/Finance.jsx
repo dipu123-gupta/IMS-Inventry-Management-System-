@@ -5,6 +5,7 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { TrendingUp, TrendingDown, Banknote, PieChart, Calendar } from 'lucide-react';
 import { CardSkeleton } from '../components/Skeleton';
 import { formatCurrency } from '../utils/format';
+import socketService from '../services/socketService';
 
 const Finance = () => {
   const dispatch = useDispatch();
@@ -14,8 +15,22 @@ const Finance = () => {
   const [dateRange, setDateRange] = useState({ startDate: '', endDate: '' });
 
   useEffect(() => {
-    dispatch(fetchFinanceSummary(dateRange));
-    dispatch(fetchFinanceChart());
+    const loadData = () => {
+      dispatch(fetchFinanceSummary(dateRange));
+      dispatch(fetchFinanceChart());
+    };
+
+    loadData();
+
+    // Subscribe to real-time updates
+    const unsubscribe = socketService.onDashboardUpdate(() => {
+      console.log('[Realtime] Finance page refresh triggered');
+      loadData();
+    });
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
   }, [dispatch, dateRange]);
 
   const stats = [

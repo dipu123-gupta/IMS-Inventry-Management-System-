@@ -391,7 +391,7 @@ const Products = () => {
             </div>
             <div className="modal-action pt-4 border-t border-base-200/60 mt-6">
               <button type="button" className="btn btn-ghost rounded-xl font-bold" onClick={() => setShowModal(false)}>Cancel</button>
-              <button type="submit" className="btn btn-primary rounded-xl font-bold shadow-lg shadow-primary/20">{editingId ? 'Save Changes' : 'Create Product'}</button>
+              <button type="submit" className="btn btn-primary rounded-xl font-bold shadow-lg shadow-primary/20" disabled={isLoading}>{editingId ? 'Save Changes' : 'Create Product'}</button>
             </div>
           </form>
         </div>

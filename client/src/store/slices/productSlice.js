@@ -83,11 +83,20 @@ const productSlice = createSlice({
         state.page = action.payload.page;
       })
       .addCase(fetchProducts.rejected, (state, action) => { state.isLoading = false; state.error = action.payload; })
-      .addCase(createProduct.fulfilled, (state, action) => { state.items.unshift(action.payload); state.total++; })
+      .addCase(createProduct.pending, (state) => { state.isLoading = true; })
+      .addCase(createProduct.fulfilled, (state, action) => { 
+        state.isLoading = false;
+        state.items.unshift(action.payload); 
+        state.total++; 
+      })
+      .addCase(createProduct.rejected, (state, action) => { state.isLoading = false; state.error = action.payload; })
+      .addCase(updateProduct.pending, (state) => { state.isLoading = true; })
       .addCase(updateProduct.fulfilled, (state, action) => {
+        state.isLoading = false;
         const idx = state.items.findIndex((p) => p._id === action.payload._id);
         if (idx !== -1) state.items[idx] = action.payload;
       })
+      .addCase(updateProduct.rejected, (state, action) => { state.isLoading = false; state.error = action.payload; })
       .addCase(deleteProduct.fulfilled, (state, action) => {
         state.items = state.items.filter((p) => p._id !== action.payload);
         state.total--;
