@@ -7,10 +7,10 @@ const ProtectedRoute = ({ children, roles }) => {
   if (!user) return <Navigate to="/login" replace />;
   if (roles && !roles.includes(user.role)) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold text-error">403</h1>
-          <p className="text-lg mt-2">Access Denied</p>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
+        <div style={{ textAlign: 'center' }}>
+          <h1 style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#ef4444' }}>403</h1>
+          <p style={{ fontSize: '1.125rem', marginTop: '0.5rem', color: '#94a3b8' }}>Access Denied — You don't have permission to view this page.</p>
         </div>
       </div>
     );
