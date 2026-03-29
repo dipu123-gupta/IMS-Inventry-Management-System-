@@ -10,13 +10,16 @@ exports.exportToCSV = async (req, res, next) => {
     let fields;
 
     if (entity === 'products') {
-      data = await Product.find({ organization: req.organization }).populate('vendor', 'name');
+      const docs = await Product.find({ organization: req.organization }).populate('vendor', 'name');
+      data = docs.map(d => d.toJSON());
       fields = ['name', 'sku', 'category', 'price', 'cost', 'totalQuantity', 'lowStockThreshold'];
     } else if (entity === 'orders') {
-      data = await Order.find({ organization: req.organization }).populate('customer', 'name').populate('vendor', 'name');
+      const docs = await Order.find({ organization: req.organization }).populate('customer', 'name').populate('vendor', 'name');
+      data = docs.map(d => d.toJSON());
       fields = ['orderNumber', 'type', 'totalAmount', 'status', 'paymentStatus', 'createdAt'];
     } else if (entity === 'vendors') {
-      data = await Vendor.find({ organization: req.organization });
+      const docs = await Vendor.find({ organization: req.organization });
+      data = docs.map(d => d.toJSON());
       fields = ['name', 'email', 'phone', 'contactPerson', 'address'];
     } else {
       return res.status(400).json({ message: 'Invalid entity' });
@@ -39,11 +42,14 @@ exports.exportToJSON = async (req, res, next) => {
     let data;
 
     if (entity === 'products') {
-      data = await Product.find({ organization: req.organization }).populate('vendor', 'name');
+      const docs = await Product.find({ organization: req.organization }).populate('vendor', 'name');
+      data = docs.map(d => d.toJSON());
     } else if (entity === 'orders') {
-      data = await Order.find({ organization: req.organization });
+      const docs = await Order.find({ organization: req.organization });
+      data = docs.map(d => d.toJSON());
     } else if (entity === 'vendors') {
-      data = await Vendor.find({ organization: req.organization });
+      const docs = await Vendor.find({ organization: req.organization });
+      data = docs.map(d => d.toJSON());
     } else {
       return res.status(400).json({ message: 'Invalid entity' });
     }

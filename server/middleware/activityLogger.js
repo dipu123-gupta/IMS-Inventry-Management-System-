@@ -8,6 +8,7 @@ const logActivity = (action, entity) => {
     res.json = (data) => {
       // Log only on successful operations
       if (res.statusCode >= 200 && res.statusCode < 300 && req.user) {
+        // ... (logging logic stays same)
         ActivityLog.create({
           user: req.user._id,
           action,
@@ -21,6 +22,8 @@ const logActivity = (action, entity) => {
           organization: req.organization,
         }).catch((err) => console.error('Activity log error:', err));
       }
+      
+      // Call the next proxy in the chain (e.g., redisCache) or original res.json
       return originalJson(data);
     };
 

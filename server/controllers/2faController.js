@@ -9,7 +9,7 @@ exports.setup2FA = async (req, res) => {
     
     // Generate secret if not exists
     if (!user.twoFactorSecret) {
-      const secret = generateSecret();
+      const secret = authenticator.generateSecret();
       user = await User.findByIdAndUpdate(
         req.user._id, 
         { twoFactorSecret: secret }, 
@@ -17,17 +17,16 @@ exports.setup2FA = async (req, res) => {
       ).select('+twoFactorSecret');
     }
 
-    const otpauth = generateURI({
-      issuer: 'IMS-SaaS',
-      label: user.email,
-      secret: user.twoFactorSecret
+    const otpauth = generateURI({ 
+      issuer: 'IMS-SaaS', 
+      label: user.email, 
+      secret: user.twoFactorSecret 
     });
     
     const qrImageUrl = await qrcode.toDataURL(otpauth);
 
     res.json({
       qrCode: qrImageUrl,
-      secret: user.twoFactorSecret,
       enabled: user.isTwoFactorEnabled
     });
   } catch (err) {
@@ -41,12 +40,9 @@ exports.verify2FA = async (req, res) => {
   try {
     const user = await User.findById(req.user._id).select('+twoFactorSecret');
     
-    const isValid = verifySync({
-      token,
-      secret: user.twoFactorSecret
-    });
+    const { valid } = verifySync({ token, secret: user.twoFactorSecret });
     
-    if (isValid) {
+    if (valid) {
       user.isTwoFactorEnabled = true;
       await user.save();
       res.json({ message: '2FA enabled successfully' });
@@ -71,3 +67,4 @@ exports.disable2FA = async (req, res) => {
     res.status(500).json({ message: 'Error disabling 2FA' });
   }
 };
+

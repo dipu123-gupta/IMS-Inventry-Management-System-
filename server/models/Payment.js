@@ -4,7 +4,6 @@ const paymentSchema = new mongoose.Schema({
   paymentNumber: {
     type: String,
     required: true,
-    unique: true,
   },
   bill: {
     type: mongoose.Schema.Types.ObjectId,
@@ -67,6 +66,7 @@ const paymentSchema = new mongoose.Schema({
   },
 }, { timestamps: true });
 
+paymentSchema.index({ paymentNumber: 1, organization: 1 }, { unique: true });
 paymentSchema.index({ invoice: 1, organization: 1 });
 paymentSchema.index({ bill: 1, organization: 1 });
 paymentSchema.index({ customer: 1, organization: 1 });

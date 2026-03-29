@@ -2,6 +2,7 @@ const cron = require('node-cron');
 const Product = require('../models/Product');
 const Quote = require('../models/Quote');
 const Order = require('../models/Order');
+const Bill = require('../models/Bill');
 const Invoice = require('../models/Invoice');
 const Notification = require('../models/Notification');
 const NotificationService = require('../src/services/NotificationService');
@@ -76,10 +77,8 @@ const initCron = () => {
     logger.info('Scanning for overdue bills...');
     try {
       const now = new Date();
-      const overdueBills = await Order.find({
-        type: 'purchase',
-        status: { $ne: 'cancelled' },
-        paymentStatus: { $ne: 'paid' },
+      const overdueBills = await Bill.find({
+        status: { $in: ['open', 'partially_paid'] },
         dueDate: { $lt: now }
       }).populate('vendor', 'name');
 
@@ -88,7 +87,7 @@ const initCron = () => {
         await NotificationService.createNotification({
           type: NOTIFICATION_TYPE.BILL_ALERT,
           title: 'Overdue Bill Alert',
-          message: `Bill ${bill.orderNumber} for ${bill.vendor?.name} is overdue.`,
+          message: `Bill ${bill.billNumber} for ${bill.vendor?.name} is overdue.`,
           link: `/billing`,
           organization: bill.organization
         });

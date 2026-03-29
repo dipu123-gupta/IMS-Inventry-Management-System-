@@ -22,8 +22,6 @@ const organizationSchema = new mongoose.Schema(
       required: true,
     },
     subscription: {
-      type: Object,
-      default: {},
       plan: {
         type: String,
         enum: Object.values(SUBSCRIPTION_PLANS),
@@ -44,8 +42,6 @@ const organizationSchema = new mongoose.Schema(
       },
     },
     settings: {
-      type: Object,
-      default: {},
       currency: {
         type: String,
         default: 'USD',

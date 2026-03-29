@@ -140,19 +140,51 @@ class QuoteService {
         throw error;
       }
 
-      // Build order data from quote
-      const orderData = {
-        type: 'sale',
-        customer: quote.customer,
-        quoteReference: quote._id,
-        items: quote.items.map(item => ({
-          product: item.product._id || item.product,
-          warehouse: item.warehouse,
+      // Build order data from quote — resolve warehouse for each item
+      const orderItems = [];
+      for (const item of quote.items) {
+        const productId = item.product._id || item.product;
+        let warehouseId = item.warehouse;
+
+        // If quote item has no warehouse, use the product's first available warehouse
+        if (!warehouseId) {
+          const ProductRepository = require('../repositories/ProductRepository');
+          const product = await ProductRepository.model
+            .findOne({ _id: productId, organization })
+            .session(session);
+          if (product && product.warehouseStock.length > 0) {
+            warehouseId = product.warehouseStock[0].warehouse;
+          } else {
+            // Fallback: get first warehouse in the org
+            const WarehouseRepository = require('../repositories/WarehouseRepository');
+            const defaultWh = await WarehouseRepository.model
+              .findOne({ organization })
+              .session(session);
+            warehouseId = defaultWh?._id;
+          }
+        }
+
+        if (!warehouseId) {
+          const error = new Error(`No warehouse available for product ${item.product?.name || productId}. Please create a warehouse first.`);
+          error.statusCode = 400;
+          throw error;
+        }
+
+        orderItems.push({
+          product: productId,
+          warehouse: warehouseId,
           quantity: item.quantity,
           price: item.price,
           discount: item.discount,
           tax: item.tax,
-        })),
+        });
+      }
+
+      const orderData = {
+        type: 'sale',
+        customer: quote.customer,
+        quoteReference: quote._id,
+        items: orderItems,
         notes: `Converted from Quote ${quote.quoteNumber}`,
         createdBy: user._id,
         organization,

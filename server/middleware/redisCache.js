@@ -36,6 +36,7 @@ const redisCache = (ttlSeconds = 300) => {
             logger.error(`Error setting cache for ${key}`, err);
           }
         }
+        // Call the next proxy in the chain (e.g., activityLogger) or original res.json
         return originalJson(body);
       };
 

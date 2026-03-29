@@ -1,5 +1,6 @@
 const { eventBus, EVENTS } = require('./eventBus');
 const logger = require('./logger');
+const config = require('../config/env');
 
 let io;
 
@@ -7,7 +8,7 @@ const init = (server) => {
   const { Server } = require('socket.io');
   io = new Server(server, {
     cors: {
-      origin: "*", // Adjust in production
+      origin: config.CLIENT_URL || '*',
       methods: ["GET", "POST"]
     }
   });

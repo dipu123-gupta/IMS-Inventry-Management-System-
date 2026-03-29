@@ -3,7 +3,6 @@ const mongoose = require('mongoose');
 const returnSchema = new mongoose.Schema({
   returnNumber: {
     type: String,
-    unique: true
   },
   organization: {
     type: mongoose.Schema.Types.ObjectId,

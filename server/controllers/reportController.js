@@ -30,15 +30,16 @@ exports.getDashboard = async (req, res, next) => {
     const lowStockCount = lowStockResult[0]?.count || 0;
 
     // Revenue from completed sales
+    const orgObjectId = new mongoose.Types.ObjectId(req.organization);
     const revenueResult = await Order.aggregate([
-      { $match: { organization: req.organization, type: 'sale', status: { $ne: 'cancelled' } } },
+      { $match: { organization: orgObjectId, type: 'sale', status: { $ne: 'cancelled' } } },
       { $group: { _id: null, total: { $sum: '$totalAmount' } } },
     ]);
     const totalRevenue = revenueResult[0]?.total || 0;
 
     // Purchase cost
     const costResult = await Order.aggregate([
-      { $match: { organization: req.organization, type: 'purchase', status: { $ne: 'cancelled' } } },
+      { $match: { organization: orgObjectId, type: 'purchase', status: { $ne: 'cancelled' } } },
       { $group: { _id: null, total: { $sum: '$totalAmount' } } },
     ]);
     const totalCost = costResult[0]?.total || 0;
@@ -48,7 +49,7 @@ exports.getDashboard = async (req, res, next) => {
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
     const monthlySales = await Order.aggregate([
-      { $match: { organization: req.organization, type: 'sale', status: { $ne: 'cancelled' }, createdAt: { $gte: sixMonthsAgo } } },
+      { $match: { organization: orgObjectId, type: 'sale', status: { $ne: 'cancelled' }, createdAt: { $gte: sixMonthsAgo } } },
       {
         $group: {
           _id: { $dateToString: { format: '%Y-%m', date: '$createdAt' } },
@@ -61,7 +62,7 @@ exports.getDashboard = async (req, res, next) => {
 
     // Top products by quantity sold
     const topProducts = await Order.aggregate([
-      { $match: { organization: req.organization, type: 'sale', status: { $ne: 'cancelled' } } },
+      { $match: { organization: orgObjectId, type: 'sale', status: { $ne: 'cancelled' } } },
       { $unwind: '$items' },
       {
         $group: {
@@ -137,19 +138,24 @@ exports.getSalesReport = async (req, res, next) => {
 exports.getInventoryReport = async (req, res, next) => {
   try {
     const products = await Product.find({ organization: req.organization })
-      .populate('supplier', 'name')
+      .populate('vendor', 'name')
       .sort({ category: 1, name: 1 });
 
     const stats = await Product.aggregate([
       { $match: { organization: new mongoose.Types.ObjectId(req.organization) } },
       {
+        $addFields: {
+          totalQty: { $sum: '$warehouseStock.quantity' }
+        }
+      },
+      {
         $group: {
           _id: null,
-          totalValue: { $sum: { $multiply: ['$quantity', '$cost'] } },
-          totalItems: { $sum: '$quantity' },
+          totalValue: { $sum: { $multiply: ['$totalQty', '$cost'] } },
+          totalItems: { $sum: '$totalQty' },
           lowStockCount: {
             $sum: {
-              $cond: [{ $lte: ['$quantity', '$lowStockThreshold'] }, 1, 0]
+              $cond: [{ $lte: ['$totalQty', '$lowStockThreshold'] }, 1, 0]
             }
           }
         }
@@ -173,23 +179,26 @@ exports.exportCSV = async (req, res, next) => {
     const org = await Organization.findById(req.organization);
     const currency = org?.settings?.currency || 'USD';
 
+    let headers;
+    let data;
+
     if (type === 'products') {
-      const products = await Product.find({ organization: req.organization }).lean();
-      let headers = `Name,SKU,Category,Price (${currency}),Cost (${currency}),Quantity,Warehouse\n`;
-      let data = products.map(
-        (p) => `"${p.name}","${p.sku}","${p.category}",${p.price},${p.cost},${p.quantity || 0},"${p.warehouse || ''}"`
+      const products = await Product.find({ organization: req.organization });
+      headers = `Name,SKU,Category,Price (${currency}),Cost (${currency}),Total Quantity\n`;
+      data = products.map(
+        (p) => `"${p.name}","${p.sku}","${p.category}",${p.price},${p.cost},${p.totalQuantity || 0}`
       );
     } else if (type === 'orders') {
       const orders = await Order.find({ organization: req.organization }).lean();
-      let headers = `Order Number,Type,Status,Total Amount (${currency}),Date\n`;
-      let data = orders.map(
+      headers = `Order Number,Type,Status,Total Amount (${currency}),Date\n`;
+      data = orders.map(
         (o) =>
           `"${o.orderNumber}","${o.type}","${o.status}",${o.totalAmount},"${new Date(o.createdAt).toISOString()}"`
       );
     } else {
       const logs = await InventoryLog.find({ organization: req.organization }).populate('product', 'name sku').lean();
-      let headers = 'Product,SKU,Type,Quantity,Previous Stock,New Stock,Reason,Date\n';
-      let data = logs.map(
+      headers = 'Product,SKU,Type,Quantity,Previous Stock,New Stock,Reason,Date\n';
+      data = logs.map(
         (l) =>
           `"${l.product?.name || ''}","${l.product?.sku || ''}","${l.type}",${l.quantity},${l.previousStock},${l.newStock},"${l.reason}","${new Date(l.createdAt).toISOString()}"`
       );

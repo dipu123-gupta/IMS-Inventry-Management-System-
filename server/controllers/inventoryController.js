@@ -70,7 +70,7 @@ exports.adjustStock = async (req, res, next) => {
 
     if (type === 'in') {
       if (stockIndex === -1) {
-        product.warehouseStock.push({ warehouse: warehouseId, quantity });
+        product.warehouseStock.push({ warehouse: effectiveWarehouseId, quantity });
         stockIndex = product.warehouseStock.length - 1;
       } else {
         product.warehouseStock[stockIndex].quantity += quantity;
@@ -84,7 +84,7 @@ exports.adjustStock = async (req, res, next) => {
     } else {
       // adjustment — set to exact value
       if (stockIndex === -1) {
-        product.warehouseStock.push({ warehouse: warehouseId, quantity });
+        product.warehouseStock.push({ warehouse: effectiveWarehouseId, quantity });
         stockIndex = product.warehouseStock.length - 1;
       } else {
         product.warehouseStock[stockIndex].quantity = quantity;
@@ -95,7 +95,7 @@ exports.adjustStock = async (req, res, next) => {
 
     const log = await InventoryLog.create([{
       product: productId,
-      warehouse: warehouseId,
+      warehouse: effectiveWarehouseId,
       type,
       quantity,
       previousStock,
@@ -119,7 +119,7 @@ exports.adjustStock = async (req, res, next) => {
 
     await session.commitTransaction();
     const logger = require('../utils/logger');
-    logger.info(`Stock adjusted for product ${productId} in warehouse ${warehouseId}. New stock: ${product.warehouseStock[stockIndex].quantity}. Reason: ${reason || 'Manual adjustment'}`);
+    logger.info(`Stock adjusted for product ${productId} in warehouse ${effectiveWarehouseId}. New stock: ${product.warehouseStock[stockIndex].quantity}. Reason: ${reason || 'Manual adjustment'}`);
     res.json({ product, log: log[0] });
   } catch (error) {
     await session.abortTransaction();

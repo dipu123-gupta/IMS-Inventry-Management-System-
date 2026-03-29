@@ -1,6 +1,7 @@
 const OrderService = require('../src/services/OrderService');
 const { generateInvoiceBuffer } = require('../utils/pdfGenerator');
 const emailService = require('../src/services/EmailService');
+const logger = require('../utils/logger');
 
 // @desc    Get all orders (filtered by type)
 // @route   GET /api/orders

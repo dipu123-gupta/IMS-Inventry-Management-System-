@@ -7,6 +7,10 @@ const inventoryLogSchema = new mongoose.Schema(
       ref: 'Product',
       required: true,
     },
+    warehouse: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Warehouse',
+    },
     type: {
       type: String,
       enum: ['in', 'out', 'adjustment'],

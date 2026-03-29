@@ -7,7 +7,7 @@ const InvoiceRepository = require('../repositories/InvoiceRepository');
 const BillRepository = require('../repositories/BillRepository');
 const QuoteRepository = require('../repositories/QuoteRepository');
 const NotificationService = require('./NotificationService');
-const { ORDER_STATUS, ORDER_TYPE, QUOTE_STATUS, NOTIFICATION_TYPE } = require('../../utils/constants');
+const { ORDER_STATUS, ORDER_TYPE, QUOTE_STATUS, NOTIFICATION_TYPE, ROLES } = require('../../utils/constants');
 const { eventBus, EVENTS } = require('../../utils/eventBus');
 const logger = require('../../utils/logger');
 
@@ -69,8 +69,9 @@ class OrderService {
 
       // Update stock and create inventory logs
       for (const item of items) {
-        // For Sales: Adjust immediately. For Purchase: Only if status is completed/shipped (unlikely at creation)
-        if (type === ORDER_TYPE.SALE || data.status === ORDER_STATUS.COMPLETED || data.status === ORDER_STATUS.SHIPPED) {
+        // Only deduct/add stock if it's a completed/shipped order at creation
+        // Note: For SALE, we only deduct if status is SHIPPED/COMPLETED to avoid premature deduction
+        if (data.status === ORDER_STATUS.COMPLETED || data.status === ORDER_STATUS.SHIPPED) {
           await InventoryService.adjustStock({
             productId: item.product,
             warehouseId: item.warehouse,
@@ -95,7 +96,7 @@ class OrderService {
       });
 
       // Update customer balance if it's a credit sale
-      if (type === 'sale' && customer && paymentMethod === 'credit') {
+      if (type === 'sale' && customer && (data.paymentDetails?.method === 'credit' || paymentMethod === 'credit')) {
         const customerDoc = await CustomerRepository.findOne({ _id: customer, organization }).session(session);
         if (customerDoc) {
           customerDoc.currentBalance += orderDoc.totalAmount;
@@ -182,6 +183,23 @@ class OrderService {
         }
       }
 
+      // If SO is moving to SHIPPED or COMPLETED, deduct stock
+      if (order.type === ORDER_TYPE.SALE && (status === ORDER_STATUS.SHIPPED || status === ORDER_STATUS.COMPLETED) && order.status !== ORDER_STATUS.SHIPPED && order.status !== ORDER_STATUS.COMPLETED) {
+        for (const item of order.items) {
+          await InventoryService.adjustStock({
+            productId: item.product,
+            warehouseId: item.warehouse,
+            quantity: item.quantity,
+            type: 'out',
+            reason: `Sales Order Shipped: ${order.orderNumber}`,
+            referenceId: order._id,
+            userId: user._id,
+            organizationId: organization,
+            session
+          });
+        }
+      }
+
       if (status === ORDER_STATUS.CANCELLED && (order.status === ORDER_STATUS.COMPLETED || order.status === ORDER_STATUS.SHIPPED)) {
         for (const item of order.items) {
           await InventoryService.adjustStock({
@@ -197,7 +215,7 @@ class OrderService {
           });
         }
 
-        if (order.type === 'sale' && order.customer && order.paymentMethod === 'credit') {
+        if (order.type === 'sale' && order.customer && (order.paymentDetails?.method === 'credit')) {
           const customer = await CustomerRepository.findOne({ _id: order.customer, organization }).session(session);
           if (customer) {
             customer.currentBalance -= order.totalAmount;

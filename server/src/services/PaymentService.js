@@ -49,8 +49,8 @@ class PaymentService {
       }
 
       if (!data.paymentNumber) {
-        const count = await PaymentRepository.countDocuments({ organization });
-        data.paymentNumber = `PAY-${new Date().getFullYear()}-${String(count + 1).padStart(5, '0')}`;
+        const seq = await Counter.getNextSequence(organization, 'payment');
+        data.paymentNumber = `PAY-${new Date().getFullYear()}-${String(seq).padStart(5, '0')}`;
       }
 
       data.organization = organization;

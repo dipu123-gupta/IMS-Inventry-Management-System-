@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const { authenticator } = require('otplib');
+const { generateSecret, generateURI, verifySync } = require('otplib');
 const config = require('../../config/env');
 const UserRepository = require('../repositories/UserRepository');
 const OrganizationRepository = require('../repositories/OrganizationRepository');
@@ -23,12 +23,13 @@ class AuthService {
     const userId = new mongoose.Types.ObjectId();
     const organizationId = new mongoose.Types.ObjectId();
 
+    // First user registering is always admin — ignore user-supplied role
     const user = await UserRepository.create({
       _id: userId,
       name,
       email,
       password,
-      role: role || 'admin',
+      role: 'admin',
       organization: organizationId
     });
 
@@ -96,9 +97,8 @@ class AuthService {
       error.statusCode = 400;
       throw error;
     }
-
-    const isValid = authenticator.check(otpToken, user.twoFactorSecret);
-    if (!isValid) {
+    const { valid } = verifySync({ token: otpToken, secret: user.twoFactorSecret });
+    if (!valid) {
       const error = new Error('Invalid 2FA token');
       error.statusCode = 401;
       throw error;

@@ -3,11 +3,22 @@ const Product = require('../models/Product');
 const Warehouse = require('../models/Warehouse');
 const User = require('../models/User');
 const PLANS = require('../config/plans');
+const logger = require('../utils/logger');
+
+// Initialize Stripe only if key is configured
+let stripe = null;
+if (process.env.STRIPE_SECRET_KEY) {
+  const Stripe = require('stripe');
+  stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+} else {
+  logger.warn('STRIPE_SECRET_KEY not configured — subscription billing endpoints will be unavailable.');
+}
 
 // @desc    Create Stripe Checkout Session
 // @route   POST /api/subscriptions/checkout
 exports.createCheckoutSession = async (req, res, next) => {
   try {
+    if (!stripe) return res.status(503).json({ message: 'Stripe billing is not configured.' });
     const { priceId } = req.body;
     const organization = await Organization.findById(req.organization).populate('owner');
 
@@ -60,6 +71,7 @@ exports.createCheckoutSession = async (req, res, next) => {
 // @route   POST /api/subscriptions/portal
 exports.createPortalSession = async (req, res, next) => {
   try {
+    if (!stripe) return res.status(503).json({ message: 'Stripe billing is not configured.' });
     const organization = await Organization.findById(req.organization);
 
     if (!organization || !organization.subscription.stripeCustomerId) {
@@ -110,6 +122,7 @@ exports.getSubscriptionStatus = async (req, res, next) => {
 // @desc    Stripe Webhook Handler
 // @route   POST /api/subscriptions/webhook
 exports.handleWebhook = async (req, res) => {
+  if (!stripe) return res.status(503).json({ message: 'Stripe billing is not configured.' });
   const sig = req.headers['stripe-signature'];
   let event;
 

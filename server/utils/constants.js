@@ -97,7 +97,7 @@ const SUBSCRIPTION_PLANS = {
 const SUBSCRIPTION_STATUS = {
   ACTIVE: 'active',
   INACTIVE: 'inactive',
-  PAST_DEUE: 'past_due',
+  PAST_DUE: 'past_due',
   CANCELED: 'canceled',
   TRIALING: 'trialing'
 };
